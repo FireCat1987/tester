@@ -4,7 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
+import com.rustem.tester.MyAlertDialog;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
@@ -40,18 +40,17 @@ import butterknife.ButterKnife;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements MyAlertDialog.AlertDialogListener {
 
     // Строка используемая при регистрации сообщений об ошибках
     private static final String TAG = "FlagQuiz Activity";
 
     private static final int FLAGS_IN_QUIZ = 10;
-
+    private int totalGuesses;
     private List<String> fileNameList;
     private List<String> quizCountriesList;
     private Set<String> regionsSet;
     private String correctAnswer;
-    private int totalGuesses;
     private int correctAnswers;
     private int guessRows;
     private SecureRandom random;
@@ -250,30 +249,7 @@ public class MainActivityFragment extends Fragment {
                 disableButtons();
 
                 if (correctAnswers == FLAGS_IN_QUIZ) {
-                    DialogFragment quizResults = new DialogFragment() {
-                        @NonNull
-                        @Override
-                        public Dialog onCreateDialog(Bundle bundle) {
-                            AlertDialog.Builder builder =
-                                    new AlertDialog.Builder(getActivity());
-                            builder.setMessage(
-                                    getString(R.string.results,
-                                            totalGuesses,
-                                            (1000 / (double) totalGuesses)));
-
-                            builder.setPositiveButton(R.string.reset_quiz,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog,
-                                                            int id) {
-                                            resetQuiz();
-                                        }
-                                    }
-                            );
-
-                            return builder.create();
-                        }
-                    };
-
+                    DialogFragment quizResults = MyAlertDialog.newInstance(totalGuesses);
                     quizResults.setCancelable(false);
                     quizResults.show(getFragmentManager(), "quiz results");
                 } else {
@@ -296,11 +272,23 @@ public class MainActivityFragment extends Fragment {
         }
     };
 
+
+
     private void disableButtons() {
         for (int row = 0; row < guessRows; row++) {
             LinearLayout guessRow = guessLinearLayouts.get(row);
             for (int i = 0; i < guessRow.getChildCount(); i++)
                 guessRow.getChildAt(i).setEnabled(false);
         }
+    }
+
+    @Override
+    public void onPositiveClick() {
+        resetQuiz();
+    }
+
+    @Override
+    public void onNegativeClick() {
+
     }
 }
